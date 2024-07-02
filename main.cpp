@@ -92,9 +92,9 @@ int main(int argc, char **argv)
 
         if (argc >= 4)
             prof = atoi(string(argv[3]).c_str());
-        while (prof != GAMEPAD && prof != WHEEL)
+        while (prof != GAMEPAD && prof != WHEEL && prof != CLASSIC)
         {
-            cout << "Specify joystick type.\n0 for Gamepad\t1 for wheel\nKeep in mind you can determine via CLI by launching ./main 1 /dev/input/jsX 0/1.\n";
+            cout << "Specify joystick type.\n0 for Gamepad\t1 for wheel\t2 for classic controller\nKeep in mind you can determine via CLI by launching ./main 1 /dev/input/jsX 0/1.\n";
 
             cout << "\nEnter profile:\t";
             cin >> prof;

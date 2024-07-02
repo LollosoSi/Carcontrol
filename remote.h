@@ -22,7 +22,8 @@ enum PROFILE_PAD
 {
 
     GAMEPAD = 0,
-    WHEEL = 1
+    WHEEL = 1,
+	CLASSIC = 2
 
 };
 class Remote : public Tickable, public Messageable, public JoystickHandler
@@ -130,17 +131,47 @@ public:
                 break;
             }
             break;
-        }
+
+			case CLASSIC:
+
+					switch (button) {
+					case 8:
+						if (value)
+						classic_servo_offset--;
+						break;
+					case 9:
+						if (value)
+						classic_servo_offset++;
+						break;
+					case 10:
+						if (value)
+						classic_servo_offset = 0;
+						break;
+						// Slow forward
+					case 11:
+						isESCLock = (bool) value;
+						ESC = value ? 85 : 90;
+						break;
+
+						// Slow backwards
+					case 12:
+						isESCLock = (bool) value;
+						ESC = value ? 103 : 90;
+						break;
+					}
+				break;
+			}
 
         cout << std::endl;
         cout.flush();
     }
 
     int brake = 0, accel = 0;
+    int classic_servo_offset = 0, classic_restriction = 0;
     void receivedAxis(const uint8_t axis, const short x, const short y)
     {
 
-        printf("Axis %zu at (%6d, %6d)\n", axis, x, y);
+        //printf("Axis %zu at (%6d, %6d)\n", axis, x, y);
         // mapvalues(x, -14000, 14000, 0, 180)
         //                         mapvalues(y, -14000, 14000, 0, 180)
 
@@ -180,8 +211,28 @@ public:
                 return;
             }
             break;
+			case CLASSIC:
+
+				switch (axis) {
+				case 0:
+					if (isESCLock)
+						return;
+					ESC = mapvalues(y, -32767, 32767, 0+classic_restriction, 180-classic_restriction) - 1;
+					if (ESC == 91 || ESC == 89)
+						ESC = 90;
+					break;
+				case 1:
+					classic_restriction = mapvalues(x, -32767, 32767, 60, 0);
+					SERVO = mapvalues(y, -32767, 32767, 0 + servo_margin_limit,
+							180 - servo_margin_limit) - 1 + classic_servo_offset;
+					if (SERVO == 91 || SERVO == 89)
+						SERVO = 90;
+					return;
+				}
+				break;
         }
 
+        cout << "ESC: " << (int)ESC << " SERVO: " << (int)SERVO;
         cout << std::endl;
         cout.flush();
     }
